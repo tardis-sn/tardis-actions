@@ -9,7 +9,7 @@ inputs:
   lock-file-url-prefix:
     description: "url for lock file, default tardis-base/master"
     required: false
-    default: "https://raw.githubusercontent.com/tardis-sn/tardis-base/master/"
+    default: "https://raw.githubusercontent.com/tardis-sn/tardis-base/master"
 
 runs:
   using: "composite"
