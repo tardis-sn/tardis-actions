@@ -6,13 +6,16 @@ inputs:
     description: "os label for lock file, default linux"
     required: true
     default: "linux"
+  lock-file-url:
+    description: "url for lock file, default https://raw.githubusercontent.com/tardis-sn/tardis-base/master/conda-${{ inputs.os-label }}.lock"
+    required: false
+    default: "https://raw.githubusercontent.com/tardis-sn/tardis-base/master/conda-${{ inputs.os-label }}.lock"
 
 runs:
   using: "composite"
   steps:
       - name: Download Lock File
-        run:  wget -q https://raw.githubusercontent.com/tardis-sn/tardis/master/conda-${{ inputs.os-label }}.lock
-        if: matrix.pip == true
+        run:  wget -q ${{ inputs.lock-file-url }}
         shell: bash
       
       - name: Generate Cache Key
@@ -24,7 +27,7 @@ runs:
         
       - uses: mamba-org/setup-micromamba@v2
         with:
-          environment-file: tardis_carsus_env_merge/conda-${{ inputs.os-label }}.lock
+          environment-file: conda-${{ inputs.os-label }}.lock
           cache-environment-key: ${{ steps.cache-environment-key.outputs.file_hash }}
           cache-downloads-key: ${{ steps.cache-environment-key.outputs.file_hash }}
           environment-name: tardis
