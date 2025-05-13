@@ -3,19 +3,19 @@ description: "Sets up environment for tardis and caches it"
 
 inputs:
   os-label:
-    description: "os label for lock file, default linux"
+    description: "os label for lock file, default linux-64"
     required: true
-    default: "linux"
-  lock-file-url:
-    description: "url for lock file, default https://raw.githubusercontent.com/tardis-sn/tardis-base/master/conda-${{ inputs.os-label }}.lock"
+    default: "linux-64"
+  lock-file-url-prefix:
+    description: "url for lock file, default tardis-base/master"
     required: false
-    default: "https://raw.githubusercontent.com/tardis-sn/tardis-base/master/conda-${{ inputs.os-label }}.lock"
+    default: "https://raw.githubusercontent.com/tardis-sn/tardis-base/master/"
 
 runs:
   using: "composite"
   steps:
       - name: Download Lock File
-        run:  wget -q ${{ inputs.lock-file-url }}
+        run:  wget -q ${{ inputs.lock-file-url-prefix }}/conda-${{ inputs.os-label }}.lock
         shell: bash
       
       - name: Generate Cache Key
