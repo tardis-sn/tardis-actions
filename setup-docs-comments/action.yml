@@ -22,7 +22,6 @@ runs:
           issue-number: ${{ github.event.number }}
           body-includes: Hi, human.
         if: always() && github.event_name == 'pull_request_target'
-        shell: bash
 
       - name: Post comment (success)
         uses: peter-evans/create-or-update-comment@v1
@@ -42,7 +41,6 @@ runs:
         env:
           URL: https://${{ inputs.repository-owner }}.github.io/${{ inputs.repository-name }}/pull/${{ github.event.number }}/index.html
         if: success() && github.event_name == 'pull_request_target'
-        shell: bash
 
       - name: Post comment (failure)
         uses: peter-evans/create-or-update-comment@v1
@@ -62,4 +60,3 @@ runs:
         env:
           URL: https://github.com/${{ inputs.repository-owner }}/${{ inputs.repository-name }}/actions/runs/${{ github.run_id }}?check_suite_focus=true
         if: failure() && github.event_name == 'pull_request_target'
-        shell: bash
