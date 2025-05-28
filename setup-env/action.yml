@@ -10,6 +10,17 @@ inputs:
     description: "url for lock file, default tardis-base/master"
     required: false
     default: "https://raw.githubusercontent.com/tardis-sn/tardis-base/master"
+  environment-name:
+    description: "name of the environment, default tardis"
+    required: false
+    default: "tardis"
+  cache-environment:
+    description: "if true, cache the environment"
+    required: false
+    default: "true"
+  cache-downloads:
+    description: "if true, cache the downloads"
+    required: false
 
 runs:
   using: "composite"
@@ -25,11 +36,12 @@ runs:
         id: cache-environment-key
         shell: bash
         
-      - uses: mamba-org/setup-micromamba@v2
+      - name: Setup Micromamba and Cache
+        uses: mamba-org/setup-micromamba@v2
         with:
           environment-file: conda-${{ inputs.os-label }}.lock
           cache-environment-key: ${{ steps.cache-environment-key.outputs.file_hash }}
           cache-downloads-key: ${{ steps.cache-environment-key.outputs.file_hash }}
-          environment-name: tardis
-          cache-environment: true
-          cache-downloads: true
+          environment-name: ${{ inputs.environment-name }}
+          cache-environment: ${{ inputs.cache-environment }}
+          cache-downloads: ${{ inputs.cache-downloads }}
