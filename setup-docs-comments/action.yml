@@ -1,0 +1,65 @@
+name: "Setup docs comments"
+description: "Posts success/failure comments on pull requests"
+
+inputs:
+  bot-token:
+    description: "GitHub token for bot operations"
+    required: true
+  repository-name:
+    description: "Repository name for URL construction"
+    required: true
+  repository-owner:
+    description: "Repository owner for URL construction"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+      - name: Find comment
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.number }}
+          body-includes: Hi, human.
+        if: always() && github.event_name == 'pull_request_target'
+        shell: bash
+
+      - name: Post comment (success)
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          token: ${{ inputs.bot-token }}
+          issue-number: ${{ github.event.number }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            *\*beep\* \*bop\**
+
+            Hi, human.
+
+            The **`${{ github.workflow }}`** workflow has **succeeded** :heavy_check_mark:
+
+            [**Click here**](${{ env.URL }}) to see your results.
+        env:
+          URL: https://${{ inputs.repository-owner }}.github.io/${{ inputs.repository-name }}/pull/${{ github.event.number }}/index.html
+        if: success() && github.event_name == 'pull_request_target'
+        shell: bash
+
+      - name: Post comment (failure)
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          token: ${{ inputs.bot-token }}
+          issue-number: ${{ github.event.number }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            *\*beep\* \*bop\**
+
+            Hi, human.
+
+            The **`${{ github.workflow }}`** workflow has **failed** :x:
+
+            [**Click here**](${{ env.URL }}) to see the build log.
+        env:
+          URL: https://github.com/${{ inputs.repository-owner }}/${{ inputs.repository-name }}/actions/runs/${{ github.run_id }}?check_suite_focus=true
+        if: failure() && github.event_name == 'pull_request_target'
+        shell: bash
