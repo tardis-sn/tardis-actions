@@ -1,0 +1,47 @@
+name: "Setup environment"
+description: "Sets up environment for tardis and caches it"
+
+inputs:
+  os-label:
+    description: "os label for lock file, default linux-64"
+    required: true
+    default: "linux-64"
+  lock-file-url-prefix:
+    description: "url for lock file, default tardis-base/master"
+    required: false
+    default: "https://raw.githubusercontent.com/tardis-sn/tardis-base/master"
+  environment-name:
+    description: "name of the environment, default tardis"
+    required: false
+    default: "tardis"
+  cache-environment:
+    description: "if true, cache the environment"
+    required: false
+    default: "true"
+  cache-downloads:
+    description: "if true, cache the downloads"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+      - name: Download Lock File
+        run:  wget -q ${{ inputs.lock-file-url-prefix }}/conda-${{ inputs.os-label }}.lock
+        shell: bash
+      
+      - name: Generate Cache Key
+        run: | 
+          file_hash=$(cat conda-${{ inputs.os-label }}.lock | shasum -a 256 | cut -d' ' -f1)
+          echo "file_hash=tardis-conda-env-${{ inputs.os-label }}-${file_hash}-v1" >> "${GITHUB_OUTPUT}"
+        id: cache-environment-key
+        shell: bash
+        
+      - name: Setup Micromamba and Cache
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: conda-${{ inputs.os-label }}.lock
+          cache-environment-key: ${{ steps.cache-environment-key.outputs.file_hash }}
+          cache-downloads-key: ${{ steps.cache-environment-key.outputs.file_hash }}
+          environment-name: ${{ inputs.environment-name }}
+          cache-environment: ${{ inputs.cache-environment }}
+          cache-downloads: ${{ inputs.cache-downloads }}
