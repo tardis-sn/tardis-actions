@@ -1,0 +1,75 @@
+name: "Setup docs comments"
+description: "Posts success/failure comments on pull requests"
+
+inputs:
+  bot-token:
+    description: "GitHub token for bot operations"
+    required: true
+  repository:
+    description: "The full name of the repository (owner/repo) where comments should be posted"
+    required: true
+  issue-number:
+    description: "The issue or pull request number where comments should be posted"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+      - name: Extract repository info
+        id: repo-info
+        shell: bash
+        run: |
+          echo "owner=$(echo "${{ inputs.repository }}" | cut -d'/' -f1)" >> $GITHUB_OUTPUT
+          echo "name=$(echo "${{ inputs.repository }}" | cut -d'/' -f2)" >> $GITHUB_OUTPUT
+          echo "Repository owner: $repo_owner"
+          echo "Repository name: $repo_name"
+
+      - name: Find comment
+        uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          token: ${{ inputs.bot-token }}
+          repository: ${{ inputs.repository }}
+          issue-number: ${{ inputs.issue-number }}
+          body-includes: Hi, human.
+        if: always()
+
+      - name: Post comment (success)
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ inputs.bot-token }}
+          repository: ${{ inputs.repository }}
+          issue-number: ${{ inputs.issue-number }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            *\*beep\* \*bop\**
+
+            Hi, human.
+
+            The **`${{ github.workflow }}`** workflow has **succeeded** :heavy_check_mark:
+
+            [**Click here**](${{ env.URL }}) to see your results.
+        env:
+          URL: https://${{ steps.repo-info.outputs.owner }}.github.io/${{ steps.repo-info.outputs.name }}/pull/${{ inputs.issue-number }}/index.html
+        if: success()
+
+      - name: Post comment (failure)
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ inputs.bot-token }}
+          repository: ${{ inputs.repository }}
+          issue-number: ${{ inputs.issue-number }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            *\*beep\* \*bop\**
+
+            Hi, human.
+
+            The **`${{ github.workflow }}`** workflow has **failed** :x:
+
+            [**Click here**](${{ env.URL }}) to see the build log.
+        env:
+          URL: https://github.com/${{ steps.repo-info.outputs.owner }}/${{ steps.repo-info.outputs.name }}/actions/runs/${{ github.run_id }}?check_suite_focus=true
+        if: failure()
