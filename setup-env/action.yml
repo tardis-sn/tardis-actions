@@ -6,6 +6,9 @@ inputs:
     description: "os label for lock file, default linux-64"
     required: true
     default: "linux-64"
+  lockfile-path:
+    description: "local path to lock file (takes precedence over lock-file-url-prefix)"
+    required: false
   lock-file-url-prefix:
     description: "url for lock file, default tardis-base/master"
     required: false
@@ -26,7 +29,12 @@ runs:
   using: "composite"
   steps:
       - name: Download Lock File
-        run:  wget -q ${{ inputs.lock-file-url-prefix }}/conda-${{ inputs.os-label }}.lock
+        run: |
+          if [ -n "${{ inputs.lockfile-path }}" ]; then
+            cp "${{ inputs.lockfile-path }}" conda-${{ inputs.os-label }}.lock
+          else
+            wget -q ${{ inputs.lock-file-url-prefix }}/conda-${{ inputs.os-label }}.lock
+          fi
         shell: bash
       
       - name: Generate Cache Key
