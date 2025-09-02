@@ -31,7 +31,7 @@ runs:
       - name: Download Lock File
         run: |
           if [ -n "${{ inputs.lockfile-path }}" ]; then
-            cp "${{ inputs.lockfile-path }}" conda-${{ inputs.os-label }}.lock
+            cp -f "${{ inputs.lockfile-path }}" conda-${{ inputs.os-label }}.lock
           else
             wget -q ${{ inputs.lock-file-url-prefix }}/conda-${{ inputs.os-label }}.lock
           fi
