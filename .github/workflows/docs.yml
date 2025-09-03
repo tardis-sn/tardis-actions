@@ -111,7 +111,7 @@ jobs:
           user_name: "TARDIS Bot"
           user_email: "tardis.sn.bot@gmail.com"
       
-      - uses: tardis-sn/tardis-actions/setup-docs-comments@docs-actions
+      - uses: tardis-sn/tardis-actions/setup-docs-comments@main
         with:
           bot-token: ${{ secrets.BOT_TOKEN }}
           repository: ${{ github.repository }}
