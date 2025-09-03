@@ -28,18 +28,20 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - name: Download Lock File
+      - name: Prepare Lock File
         run: |
           if [ -n "${{ inputs.lockfile-path }}" ]; then
-            cp -f "${{ inputs.lockfile-path }}" conda-${{ inputs.os-label }}.lock
+            echo "lockfile=${{ inputs.lockfile-path }}" >> "${GITHUB_OUTPUT}"
           else
             wget -q ${{ inputs.lock-file-url-prefix }}/conda-${{ inputs.os-label }}.lock
+            echo "lockfile=conda-${{ inputs.os-label }}.lock" >> "${GITHUB_OUTPUT}"
           fi
+        id: lockfile-path
         shell: bash
       
       - name: Generate Cache Key
         run: | 
-          file_hash=$(cat conda-${{ inputs.os-label }}.lock | shasum -a 256 | cut -d' ' -f1)
+          file_hash=$(cat "${{ steps.lockfile-path.outputs.lockfile }}" | shasum -a 256 | cut -d' ' -f1)
           echo "file_hash=tardis-conda-env-${{ inputs.os-label }}-${file_hash}-v1" >> "${GITHUB_OUTPUT}"
         id: cache-environment-key
         shell: bash
@@ -47,7 +49,7 @@ runs:
       - name: Setup Micromamba and Cache
         uses: mamba-org/setup-micromamba@v2
         with:
-          environment-file: conda-${{ inputs.os-label }}.lock
+          environment-file: ${{ steps.lockfile-path.outputs.lockfile }}
           cache-environment-key: ${{ steps.cache-environment-key.outputs.file_hash }}
           cache-downloads-key: ${{ steps.cache-environment-key.outputs.file_hash }}
           environment-name: ${{ inputs.environment-name }}
