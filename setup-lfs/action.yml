@@ -15,6 +15,10 @@ inputs:
     description: "If true, uses LFS server instead of GitHub LFS"
     required: false
     default: 'false'
+  lfs_server_url:
+    description: "URL for the LFS server"
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -51,7 +55,7 @@ runs:
       if: inputs.use_server == 'true'
       run: |
         git lfs install
-        git config lfs.url ${{ secrets.ATHARVA_MORIA_SERVER }}
+        git config lfs.url ${{ inputs.lfs_server_url }}
       working-directory: tardis-regression-data
       shell: bash
 
