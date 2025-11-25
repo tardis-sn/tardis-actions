@@ -91,7 +91,7 @@ jobs:
         id: test-lfs-cache-regression-data
         with:
           path: ${{ steps.repo-info.outputs.name }}/.git/lfs
-          key: tardis-regression-${{ inputs.atom-data-sparse == true && 'atom-data-sparse' || 'full-data' }}-${{ hashFiles(format('{0}/.lfs-files-list', steps.repo-info.outputs.name)) }}-${{ inputs.regression-data-repo }}-v1
+          key: tardis-regression-${{ inputs.atom-data-sparse == true && 'atom-data-sparse' || 'full-data' }}-${{ hashFiles(format('{0}/.lfs-files-list', steps.repo-info.outputs.name)) }}-${{ inputs.regression-data-repo }}-v2
           lookup-only: true
   
       - name: Fail if LFS pull is needed but not allowed
@@ -134,7 +134,7 @@ jobs:
         if: ${{ steps.test-lfs-cache-regression-data.outputs.cache-hit != 'true' && !contains(github.ref, 'merge') }}
         with:
           path: ${{ steps.repo-info.outputs.name }}/.git/lfs
-          key: tardis-regression-${{ inputs.atom-data-sparse == true && 'atom-data-sparse' || 'full-data' }}-${{ hashFiles(format('{0}/.lfs-files-list', steps.repo-info.outputs.name)) }}-${{ inputs.regression-data-repo }}-v1
+          key: tardis-regression-${{ inputs.atom-data-sparse == true && 'atom-data-sparse' || 'full-data' }}-${{ hashFiles(format('{0}/.lfs-files-list', steps.repo-info.outputs.name)) }}-${{ inputs.regression-data-repo }}-v2
 
       - name: Remove label
         if: ${{ inputs.allow_lfs_pull }}
