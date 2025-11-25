@@ -49,7 +49,7 @@ runs:
       with:
         path: tardis-regression-data/.git/lfs
         key: tardis-regression-${{ inputs.atom-data-sparse == 'true' && 'atom-data-sparse' || 'full-data' }}-${{ hashFiles('tardis-regression-data/.lfs-files-list') }}-${{ inputs.regression-data-repo }}-v2
-        fail-on-cache-miss: true
+        # fail-on-cache-miss: true
 
     - name: Configure LFS server
       if: inputs.use_server == 'true'
