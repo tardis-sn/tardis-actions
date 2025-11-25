@@ -18,6 +18,11 @@ on:
         required: false
         default: false
         type: boolean
+      use_server:
+        description: "If true, uses LFS server instead of GitHub LFS"
+        required: false
+        default: false
+        type: boolean
   workflow_call:
     inputs:
       atom-data-sparse:
@@ -32,6 +37,11 @@ on:
         type: string
       allow_lfs_pull:
         description: "If true, allows LFS pull operations"
+        required: false
+        default: false
+        type: boolean
+      use_server:
+        description: "If true, uses LFS server instead of GitHub LFS"
         required: false
         default: false
         type: boolean
@@ -86,12 +96,19 @@ jobs:
   
       - name: Fail if LFS pull is needed but not allowed
         if: |
-          steps.test-lfs-cache-regression-data.outputs.cache-hit != 'true' && 
+          steps.test-lfs-cache-regression-data.outputs.cache-hit != 'true' &&
           inputs.allow_lfs_pull != true
         run: |
           echo "Error: LFS pull is required but not allowed (allow_lfs_pull is false)"
           exit 1
-      
+
+      - name: Configure LFS server
+        if: inputs.use_server == true
+        run: |
+          git lfs install
+          git config lfs.url ${{ secrets.ATHARVA_MORIA_SERVER }}
+        working-directory: ${{ steps.repo-info.outputs.name }}
+
       - name: Git LFS Pull Atom Data
         if: ${{ inputs.atom-data-sparse && steps.test-lfs-cache-regression-data.outputs.cache-hit != 'true' && inputs.allow_lfs_pull }}
         run: git lfs pull --include=atom_data/kurucz_cd23_chianti_H_He.h5
