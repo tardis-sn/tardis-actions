@@ -11,10 +11,6 @@ inputs:
     description: "If true, only downloads atom_data/kurucz_cd23_chianti_H_He.h5 instead of full regression data"
     required: false
     default: 'false'
-  use_server:
-    description: "If true, uses LFS server instead of GitHub LFS"
-    required: false
-    default: 'false'
   lfs_server_url:
     description: "URL for the LFS server"
     required: false
@@ -52,7 +48,7 @@ runs:
         # fail-on-cache-miss: true
 
     - name: Configure LFS server
-      if: inputs.use_server == 'true'
+      if: inputs.lfs_server_url != ''
       run: |
         git lfs install
         git config lfs.url ${{ inputs.lfs_server_url }}
